@@ -129,7 +129,7 @@ class IntraOptionQLearningAgent():
         
         return action,action_number
     
-    def recordTransition(self, state, action_number,reward, next_state,learning_flag=True):
+    def recordTransition(self, state, action_number,reward, next_state,learning_flag=True,switch_reward=True):
         # Add reward discounted by current discounting factor
         if learning_flag:
             self.rewards.append(reward) #+= (self.gamma ** self.k) * reward
@@ -144,12 +144,13 @@ class IntraOptionQLearningAgent():
             if learning_flag:
                 # propogate back whole trajectory
                 self._updateQValueOption()
-                # intra option per action update
-                self._updateQValuesIntra()
+                if switch_reward:
+                    # intra option per action update
+                    self._updateQValuesIntra()
 
             self._resetCurrentOption()
     
-    def run_episode(self,env,max_stepnum=1000,interruption=True,verbose=False,start_new=True,learning_flag=True):
+    def run_episode(self,env,max_stepnum=1000,interruption=True,verbose=False,start_new=True,learning_flag=True,switch_reward=True):
 
         if learning_flag:
             epsilon=1
@@ -191,8 +192,8 @@ class IntraOptionQLearningAgent():
             if done and not learning_flag:
                 self._resetCurrentOption()
                 return n_steps,1
-
-            self.recordTransition(state, action_number,reward, next_state,learning_flag)
+ 
+            self.recordTransition(state, action_number,reward, next_state,learning_flag,switch_reward)
             
             state = next_state
             if done:
